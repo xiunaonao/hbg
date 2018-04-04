@@ -1,0 +1,37 @@
+extends layout
+
+block content
+	style.
+		.pay_over{text-align:center;background:#FFF;padding:25px;}
+		.pay_over h4 img{width:200px;}
+		.pay_over h1{line-height:100px;}
+		.pay_over h5{font-weight:100;line-height:50px;color:#666;}
+		.pay_over h5 a{color:#FA0;}
+
+	.pay_over
+		h4
+			img(src="/imgs/alipaySuc.jpg")
+		h1
+			支付成功
+		h5 将在
+			label#secDom 5
+			span 秒后跳转到订单详情
+			a(href="/order/detail?no=#{no}") 立即跳转
+		h4.paySucBtn
+			a(href="/order/detail?no=#{no}") 查看订单
+			a(href="/") 返回主页
+
+block footer
+	script.
+		var sec=3;
+
+		setInterval(function(){
+			sec--;
+			if(sec<=0){
+				location.href="/order/detail?no=#{no}";
+				return;
+			}
+			secDom.innerText=sec+'';
+
+		},1000);
+		

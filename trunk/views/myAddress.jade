@@ -1,0 +1,64 @@
+extends layout
+
+block content
+	.center-box
+		ul.center-left
+		.center-right
+			.form-info.address-info
+				each obj,i in data.list
+					p
+						label
+							b=obj.province
+							b=obj.city
+							b=obj.area
+							b=obj.address+' '
+							b=obj.name+' '
+							b=obj.mobile+' '
+							b=obj.identityCard
+							a.update-address(data-id='#{obj.id}') [修改]
+							a.delete-address(data-id='#{obj.id}') [删除]
+			.form-info
+				label
+					a#add_address +新增
+	.center-alert-box
+		.form-info.center-alertaddress
+			.close-btn
+			input#updateId(type='hidden')
+			h5 修改用户信息
+			p
+				span 联系电话
+				label
+					input#telephone
+			p
+				span 收货人
+				label
+					input#postName
+			p
+				span 身份证
+				label
+					input#IDCard
+			p
+				b.red &nbsp;*&nbsp;应海关监管跨境商品要求，请填写与收货人真实姓名一致的身份证信息，如有字母，请大写
+			p
+				span 收货地址
+				label
+					select#province.txt-sm
+						option 浙江省
+					select#city.txt-sm
+						option 杭州市
+					select#area.txt-sm
+						option 下城区
+			p
+				span &nbsp;
+				label
+					input.txt-xl#detailAddress
+			p
+				span &nbsp;
+				label
+					button#confirmUpdate 确定
+
+
+block footer
+	script _app.centerMenu(4);
+	script(src='/js/data_area.js?v=#{_v}')
+	script(src="/js/myAddress.js?v=#{_v}")

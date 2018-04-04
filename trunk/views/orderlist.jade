@@ -1,0 +1,148 @@
+extends layout
+
+block content
+	script(src="/js/laydate/laydate.js")
+	.center-box
+		ul.center-left
+		.center-right
+			.order-filter-status#nowStatus
+				a(data-status='0' class="#{(status==99||!status)?'c':''}") 全部订单
+					span#order_99 (0)
+				a(data-status='1' class="#{status==1?'c':''}") 待付款订单
+					span#order_1 (0)
+				a(data-status='3' class="#{status==3?'c':''}") 待发货订单
+					span#order_3 (0)
+				a(data-status='7' class="#{status==7?'c':''}") 待收货订单
+					span#order_7 (0)
+				a.returnOrder(data-status='98' class="#{status==98?'c':''}") 退款中的订单
+					span#order_98(0)
+
+			.order-filter.data-filter
+				span 收货人
+					input#postMan(value='',placeholder='请输入收货人')
+				span 下单时间
+					input#startDate(value='',placeholder='请输入开始时间')
+					b -
+					input#endDate(value='',placeholder='请输入结束时间')
+				button(onclick="dataBind()") 查询
+			ul.order-list.data-list
+				li.list-head
+					span 商品
+					span 贸易类型
+					span 交易时间
+					span 状态
+					span 总价
+					span.list-option 操作
+				-var order=data.list;
+				-if(!order) order=[]
+				each obj,index in order
+					-if(obj.subOrderList.length==0 || obj.subOrderList[0].subOrderDO.orderItemSkuList.length==0)
+						-contiune
+					-var i=0;
+					each _obj,index2 in obj.subOrderList
+						-i+=_obj.subOrderDO.orderItemSkuList.length
+
+					li.list-content(style='height:#{80*(i)+20}px',_onclick="location.href='/order/detail?no=#{obj.orderNo}'")
+						h5='订单编号:'+obj.orderNo
+						span.list-goods(style='height:#{80*(i)+20}px')
+							each _obj,index2 in obj.subOrderList
+								-var goods=[];
+								-goods=_obj.subOrderDO.orderItemSkuList;
+									each obj2,index2 in goods
+										img(onclick="location.href='/detail?id=#{obj2.itemId}'",src="#{obj2.picUrl}",data-id="#{obj2.skuId}",data-num="#{obj2.quantity}")
+										strong
+											b=obj2.itemName
+											label 规格：#{obj2.skuValue}
+
+						span.list-type(style='height:#{80*(i)}px')
+							label #{obj.orderType=='bond'?'保税':''}#{obj.orderType=='mix'?'混合':''}#{obj.orderType=='common'?'一般贸易':''}
+						span.list-date(style='height:#{80*(i)}px')
+							-var date=new Date(obj.createTime)
+							label=date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds()
+						span.list-status(style='height:#{80*(i)}px')
+							//查询全部订单status 为null；  查待支付订单 status=1；查 待发货订单status=3; 查待收货订单：status: 7；  待评价订单status=15 
+							-var stu=obj.orderStatus
+							label #{stu==0?'已取消':''}#{stu==1?'待支付':''}#{stu==3?'待发货':''}#{stu==7?'待收货':''}#{stu==4?'已关闭':''}#{stu==15?'已收货':''}
+						span.list-allprice(style='height:#{80*(i)}px') 
+							label='￥'+(obj.payPrice/100).toFixed(2)
+						span.list-option(style='height:#{80*(i)}px')
+							i
+								a(href='/order/detail?no=#{obj.orderNo}') 详情
+								br
+								-if(stu==1)
+									a(href='/order/detail?no=#{obj.orderNo}#pay_type')  去付款
+									br
+									a.cancelOrder(data-id='#{obj.orderNo}') 取消订单
+								-if(stu==3 || stu==7)
+									-if(obj.orderReturnStatus==0)
+										a.refundOrder(data-id='#{obj.orderNo}') 申请退款
+									-else if(obj.orderReturnStatus==-1)
+										//a.gray.cancelRefundOrder(data-id='#{obj.orderNo}') 退单被拒
+										a.refundOrder(data-id='#{obj.orderNo}') 申请退款
+									-else if(obj.orderReturnStatus==1)
+										a.gray.cancelRefundOrder(data-id='#{obj.orderNo}') 退单已申请
+										//a.gray.cancelRefundOrder(data-id='#{obj.orderNo}') 正在处理退款
+									-else if(obj.orderReturnStatus==3)
+										a.gray(data-id='#{obj.orderNo}') 退单审核中
+										//a.gray.cancelRefundOrder(data-id='#{obj.orderNo}') 退款已通过
+									-else if(obj.orderReturnStatus==7)
+										a.gray(data-id='#{obj.orderNo}') 退款已完成
+										//a.gray.cancelRefundOrder(data-id='#{obj.orderNo}') 已提交支付宝退款
+									-else if(obj.orderReturnStatus==8)
+										a.gray(data-id='#{obj.orderNo}') 退款已完成
+										//a.gray.cancelRefundOrder(data-id='#{obj.orderNo}') 已提交微信退款
+									br
+								-if(stu==7)
+									a.confirmOrder(data-id='#{obj.orderNo}') 确认收货
+									br
+									
+
+
+			-if(order.length>0)
+				.page-box
+					a#pageLeft(data-page='#{data.page.page>1?data.page.page-1:1}') <
+					a#nowPage=data.page.page
+					a /
+					a#allPage(data-page='#{data.page.pages}')=data.page.pages
+					a#pageRight(data-page='#{data.page.page<data.page.pages?data.page.page+1:data.page.pages}') >
+	.center-alert-box
+		.refund-box
+			.close-btn
+			h5 申请退款
+			input#refundNo(type="hidden")
+			ul.center-userinfo.order-refund
+				//li.center-userhead
+					span 订单号
+					label#orderNo 12050205252102022
+				li
+					input#allchecked(type="checkbox",checked="checked")
+					span 全选/全不选
+					label &nbsp;
+				
+				li
+					ul.refund-goods
+				li
+					span 退款方式
+					label
+						select#refundType
+							option(value="1")退货并退款
+							option(value="2")仅退款
+				li
+					span 退款理由
+					label
+						select#yourReason
+							option 多买/拍错/不想要
+							option 未按约定时间发货
+							option 快递一直未送到
+							option 空包裹/少货
+							option 其他
+				li
+					span 其他说明
+					label
+						textarea.txt-m#moreReason
+				li
+					button#confirmRefund 确定退款
+
+block footer
+	script _app.centerMenu(1);laydate.render({elem: '#startDate',type: 'date'});laydate.render({elem: '#endDate',type: 'date'});
+	script(src='/js/orderlist.js?v=#{_v}')

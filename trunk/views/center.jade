@@ -1,0 +1,87 @@
+extends layout
+
+block content
+	.center-box
+		ul.center-left
+		.center-right
+			.center-head-box
+				img(src="/imgs/head.jpg")
+				span.center-username
+					b#yourName
+						label=userName
+						a.blue 修改
+					//button#recharge.mainBg 充值
+					//button#cash 提现
+				span.center-money
+					b='￥'+(userMoney/100)
+					label 账户余额
+			ul.center-order-box
+				//li
+					b 0
+					label 退货订单
+				li
+					b#order_7 0
+					label 待收货订单
+				li
+					b#order_3 0
+					label 待发货订单
+				li
+					b#order_1 0
+					label 待付款订单
+				li
+					b#order_99 0
+					label 全部订单
+	.center-alert-box
+		.center-userupdate
+			.close-btn
+			h5 修改用户信息
+			ul.center-userinfo
+				//li.center-userhead
+					span 头像
+					label
+						img(src="/imgs/upload.png")
+						input(type="file")
+				li
+					span 昵称
+					label
+						input#yourNewName(placeholder='请输入昵称',value='#{userName}')
+				li
+					span 性别
+					label
+						select#yourNewSex
+							option 男
+							option 女
+				li
+					button#updateInfo 确定修改
+		.center-userrecharge
+			.close-btn
+			h5 用户充值
+			//ul.center-bank-list
+				li
+					span
+				li
+					span
+				li
+					span
+				li
+					span
+			ul.center-3rd-list
+				li.c(data-id='2')
+					span.alipay
+				li(data-id='3')
+					span.wxpay
+			.center-paynow
+				p
+					span 充值账户
+					label=_user.mobile
+				p
+					span 充值金额
+					input#rechargeMoney(placeholder="请输入充值金额")
+				p
+					button#rechargeSubmit 立即支付
+			#alipay_box(style="display:none;")
+				
+
+block footer
+	script _app.centerMenu(0);
+	script(src='/js/users.js?v=#{_v}')

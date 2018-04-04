@@ -1,0 +1,100 @@
+extends layout
+
+block content
+	-var obj=data.obj;
+	input#username(type="hidden",value="#{_user.mobile}")
+	
+
+
+
+	.orderbrief-info
+		p
+			span 订单编号
+			label=obj.orderNo
+		p
+			span 收货地址
+			label=obj.consigneeProvince+obj.consigneeCity+obj.consigneeArea+' '+obj.consigneeAddress+' '+obj.consigneeName+' '+obj.consigneeTele
+		ul.goodsConfirm(style="margin:10px 0;color:#a71f23;")
+			each obj2,j in obj.subOrderList
+				-var goods=[];
+				-if(data.obj) goods=obj2.subOrderDO.orderItemSkuList;
+					each item,i in goods
+						li
+							span=item.itemName
+							span='x'+item.quantity
+							span ￥#{(item.sellPrice/100).toFixed(2)}
+							span=obj2.subOrderDO.orderType=='common'?'一般贸易':'保税'
+		p.order-priceConfirm
+			i.order-totalPrice 应付
+				label.rmb=obj.payPrice>0?obj.payPrice/100:0
+			i 商品总价
+			label.rmb=obj.itemPrice/100
+			i 运费
+			label.rmb=obj.freightPrice/100
+			i 进口税
+			label.rmb=obj.taxPrice/100
+			i 平台优惠
+			label.rmb=obj.couponPrice<obj.itemPrice?obj.couponPrice/100:obj.itemPrice/100
+			
+		//p.order-allprice(style="text-align:left;font-size:30px;")
+			span 应付
+			label.rmb=obj.payPrice>0?obj.payPrice/100:0
+		
+		-if(obj.orderStatus==1)
+			div#pay_type.pay-type
+				span 
+					input.checkbox(type='checkbox',name='payType',checked='checked') 
+					label 第三方支付
+				ul.center-3rd-list
+					li.c(data-id='2')
+						span.alipay
+					li(data-id='3')
+						span.wxpay
+				//span
+					input.checkbox(type='checkbox',name='payType')
+					label 余额支付
+				//b.pay-for-balance
+					input#payCodeTxt.txt-m(type="text",palceholder="请输入6位验证码")
+					button#payCodeBtn 获取短信验证码
+		h3
+		p
+			-if(obj.orderStatus==1)
+				button#payNow 支付			
+		#alipay_box(style="display:none;")
+block footer
+	script var no='#{no}';
+	script var goodsData=[];
+	script.
+		_app.click('.center-3rd-list>li',function(t,e){
+			document.querySelector('.center-3rd-list>.c').setAttribute('class','');
+			var _t=t;
+			if(t.nodeName!='LI'){
+				_t=t.parentNode;
+			}
+			_t.setAttribute('class','c');
+		});
+		_app.click('#payNow',function(t,e){
+			var inputs=pay_type.querySelectorAll('input');
+			var form={};
+			form.orderNo=no;
+			var price=parseFloat(document.querySelector('.order-totalPrice label').innerText);
+			if(pay_type.querySelectorAll('.checkbox')[0].checked){
+				form.payType=document.querySelector('.center-3rd-list .c').getAttribute('data-id');
+			}else{
+				//form.payType=1;
+			}
+			if(form.payType==2){
+				form.returnUrl='http://47.96.177.247:3000/order/paySuccess?no='+no;
+			}
+			_app.AJAX('/api/changePay','POST',form,function(data){
+				var data=JSON.parse(data);
+				if(form.payType==3){
+					location.href='/order/pay?no='+form.orderNo+'&type='+form.payType+'&src='+data.url+'&name='+name+'&price='+price;
+				}
+				else if(form.payType==2){
+					alipay_box.innerHTML=data.url;
+					document.forms[0].submit();
+				}
+			});
+		});
+	

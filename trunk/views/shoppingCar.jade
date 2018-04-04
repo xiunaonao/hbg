@@ -1,0 +1,71 @@
+extends layout
+
+block content
+	.shoppingCar-box
+		ul.car-list.data-list
+			li.list-head
+				span.checkbox
+					input(type="checkbox",checked='true')
+				span 商品
+				span 贸易类型
+				span 交易时间
+				span.changeNum 数量
+				span 价格
+				span 总价
+				span 操作
+		#goodsList
+			-var goods=data.list;
+			each obj,i in goods
+				-var wh=obj.warehouse;
+				div
+					.shoppingCar-warehouse
+						input(type="checkbox",data-id='#{wh.id}',checked='true')
+						label=wh.name
+					-var item=obj.cartItems;
+					ul.car-list.data-list
+						each obj2,j in item
+							li.list-content
+								span.checkbox
+									input.abs-md(type="checkbox",data-id='#{obj2.id}',checked='true')
+								span.list-goods
+									img(src="#{obj2.picUrl}")
+									strong
+										b=obj2.itemName
+										label 规格 -
+
+								span.list-type 
+									label=(obj2.itemType=='common'?'一般贸易':'保税')
+								span.list-date 
+									-var d=new Date(obj2.createTime);
+									label=d.toLocaleDateString()+' '+d.toLocaleTimeString()
+								span.list-amount.changeNum
+									label
+										button(data-num='-1') -
+										input.txtNum(data-id='#{obj2.id}',type='text',value='#{obj2.amount}')
+										button(data-num='1') +
+										input.salePirce(type='hidden',value='#{obj2.sellPrice/100.0}')
+										input.skuId(type='hidden',value='#{obj2.itemSkuId}')
+										input.carId(type='hidden',value='#{obj2.id}')
+										-var priceData='';
+										each pri,k in obj2.skuPriceList
+											-if(k!=0)
+												-priceData+=','
+											-priceData+=pri.minNumber+'_'+pri.maxNumber+'_'+pri.levelPrice
+										input.priceData(type='hidden',value='#{priceData}')
+								span.list-price
+									label='￥'+(obj2.sellPrice/100.0).toFixed(2)
+								span.list-totalPrice
+									label='￥'+((obj2.sellPrice*obj2.amount)/100.0).toFixed(2)
+									input.saleTotalPrice(type='hidden',value='#{(obj2.sellPrice*obj2.amount)/100.0}')
+								span.list-option
+									label
+										a.delete-goods(data-id='#{obj2.id}') 删除
+		.shoppingCar-buy
+			button#buyNow 立即购买
+			strong='￥'+(total_price/100.0).toFixed(2)
+			label件商品，总价（不含邮费）:
+			label 共选择了
+				span#chooseNum=total_number
+		
+block footer
+	script(src='/js/shoppingCar.js?v=#{_v}')

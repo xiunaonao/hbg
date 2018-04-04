@@ -1,0 +1,61 @@
+doctype html
+html
+	head
+		title #{title}-海彼购
+		link(rel='stylesheet', href='/css/index.css?v=#{_v}')
+	body
+		.header-box
+			-if(_user)
+				.header-user
+					a(href="/") 海彼购首页
+					span.user-name 你好,
+						label #{_user.nickName}
+					span.user-order 
+						a(href='/users/shoppingCar') 货品单
+					span.user-center
+						a(href='/users') 用户中心
+					a.user-quit(href='/loginout') 退出
+			-else
+				.header-user.notlogin
+					a(href="/") 海彼购首页
+					a.user-login(href='/login') 登录
+					a.user-register(href='/register') 注册
+			.header-logo
+				.header-logo-box
+					img(src="/imgs/logo.png")
+					.header-logo-search
+						input.search-txt#searchTxt(type="text",placeholder="请输入关键词",value="#{ky!=undefined?ky:''}")
+						input.search-btn#searchBtn(type="button",value="搜索")
+				
+				ul.header-category
+					li.header-category-menu
+						span 所有分类
+					li.menus.c 
+						a(href="/") 首页
+					-if(inGoodsList)
+						li.menus 
+							a(href="/goods?type=1") 一般贸易专区
+						li.menus 
+							a(href="/goods?type=2") 保税专区
+					-else
+						li.menus
+							a(href="/order/list") 订单
+						li.menus
+							a(href="/users") 账户
+					
+
+
+		.main-box
+			block content
+
+
+		.footer-box
+			h3 © COPYRIGHT 2017 海彼购 版权所有 浙ICP备2333333号-3
+
+			
+
+
+
+
+		script(src="/js/main.js?v=#{_v}")
+		block footer

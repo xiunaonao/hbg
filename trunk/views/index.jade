@@ -1,0 +1,110 @@
+extends layout
+
+block content
+	input#__ky(type="hidden",value="")
+	.index-banner
+		ul#banner
+			-var banner=data.obj.banners
+			each obj in banner
+				li
+					a(href='#{obj.url}',target='_blank')
+						img(src="#{obj.img}")
+		#bannerIndex.bannerIndex
+			each obj,i in banner
+				i(href='#{obj.url}',class="#{i==0?'c':''}")
+	.index-category
+		.index-category-name 分类
+		.index-category-value#catBox
+			a.c(cid='-1') 全部
+			-var category=data.obj.rootCategorys
+			each obj in category
+				a(cid="#{obj.id}") #{obj.name}
+	.index-category
+		.index-category-name 品牌
+		.index-category-value#brandBox
+			a.c(cid='-1') 全部
+			-var brands=data.obj.brands
+			-var brands2=[];
+			-var showLength=10;
+			-for(var i=0;i<showLength;i++){
+			-	brands2.push(brands[i]);
+			-}
+			-if(brands2)
+				each obj in brands2
+					-if(obj)
+						a(cid="#{obj.id}") #{obj.name}
+	.goods-list
+		.list-filter
+			.list-filter-order
+				span.orderBy(data-name='sellNum') 销量
+				span.orderBy(data-name='sellPrice') 价格
+			//.list-filter-price
+				input(placeholder='￥')
+				span -
+				input(placeholder='￥')
+				button 确定
+			.list-filter-check
+				input(type='checkbox',data-name='bond')
+				span 保税
+				input(type='checkbox',data-name='common')
+				span 一般贸易
+			.list-filter-page
+				a.page-move(data-page='#{data.pcPage.page>1?data.pcPage.page-1:1}') <
+				a#pageNow=data.pcPage.page
+				span /
+				a#pageAll=data.pcPage.pages
+				a.page-move(data-page='#{data.pcPage.page<data.pcPage.pages?data.pcPage.page+1:data.pcPage.pages}') >
+		ul.list-item
+			-var item=data.obj.items
+			-if(item)
+				each obj in item
+					li.item
+						.goods
+							a.goods-img(href="/detail?id=#{obj.id}",target='_blank')
+								img(src="#{obj.picUrls[0]}")
+						.goods-title
+							a(href="/detail?id=#{obj.id}",target='_blank')
+								span=obj.name
+						.goods-price
+							.goods-price-right
+								label 市场价
+								span ￥#{(obj.marketPrice/100.0).toFixed(2)}
+
+							.goods-price-left
+								strong ￥#{(obj.sellPrice/100.0).toFixed(2)}
+
+
+block footer
+	script.
+		var __itemType=null;
+		var bannerC=#{banner.length};
+		var bannerI=0;
+		var bannerW=false;
+		setInterval(function(){
+			if(bannerW){
+				bannerW=false;
+				return;
+			}
+			bannerI++;
+			if(bannerI>=bannerC){
+				bannerI=0;
+			}
+			banner.style.webkitTransform='translateX('+bannerI*-1200+'px)';
+			bannerIndex.querySelector('.c').setAttribute('class','');
+			bannerIndex.querySelectorAll('i')[bannerI].setAttribute('class','c');
+			//banner.style.left=bannerI*-1200+'px';
+		},3000);
+		_app.click('#bannerIndex i',function(t,e){
+			for(var i=0;i<bannerIndex.querySelectorAll('i').length;i++){
+				if(bannerIndex.querySelectorAll('i')[i]==t){
+					bannerI=i;
+					break;
+				}
+			}
+			bannerW=true;
+			banner.style.webkitTransform='translateX('+bannerI*-1200+'px)';
+			bannerIndex.querySelector('.c').setAttribute('class','');
+			bannerIndex.querySelectorAll('i')[bannerI].setAttribute('class','c');
+		});
+
+	script(src="/js/goodsList.js?v=#{_v}")

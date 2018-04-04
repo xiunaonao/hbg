@@ -1,0 +1,19 @@
+extends layout
+
+block content
+	-var list=data.list;
+	.center-box
+		ul.center-left
+		.center-right
+			ul.coupon-list
+				
+				-if(!list) list=[]
+				each obj,i in list
+					li
+						span=obj.name
+						b &nbsp;
+						-var end=new Date(obj.endDate);
+						span=end.getFullYear()+'-'+(end.getMonth()+1)+'-'+end.getDate()
+
+block footer
+	script _app.centerMenu(3);

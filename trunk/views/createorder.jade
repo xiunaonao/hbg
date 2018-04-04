@@ -1,0 +1,155 @@
+extends layout
+
+block content
+	- if(data.code!=0)
+		script alert('订单无法创建，#{data.msg}')
+	.createorder-info.address-box
+		h3 收货地址
+		
+		each obj,i in data2.list
+			p
+				span 
+					-if(i==0)
+						input.checkbox(type="checkbox",checked='true')
+					-else
+						input.checkbox(type="checkbox")
+				label
+					b=obj.province
+					b=obj.city
+					b=obj.area+' '
+					b=obj.address+' '
+					b=obj.name+' '
+					b=obj.mobile+' '
+					b=obj.identityCard
+		p 
+			span
+				input.checkbox#newAddress(type="checkbox")
+			label
+				a.red 使用新地址
+		p
+			span 联系电话
+			label
+				input#telephone
+		p
+			span 收货人
+			label
+				input#postName
+		p
+			span 身份证
+			label
+				input#IDCard
+				b.red &nbsp;*&nbsp;应海关监管跨境商品要求，请填写与收货人真实姓名一致的身份证信息，如有字母，请大写
+		p
+			span 收货地址
+			label
+				select#province
+				select#city
+				select#area
+				input.txt-l#detailAddress
+		p
+			span 备注
+			label
+				input.txt-xl#message
+	.createorder-info
+		h3 商品信息
+		-var store=[];
+		input#username(type="hidden",value="#{_user.mobile}")
+		ul.data-list
+			li.list-head
+				span.list-goods 商品
+				span 贸易类型
+				span 数量
+				span 商品价
+				span 税费
+				span 总价
+			each obj,j in data.obj.subOrderList
+				-var goods=[];
+				-if(data.obj) goods=obj.subOrderDO.orderItemSkuList;
+				each obj2,i in goods
+					-var index=goods.length
+					li.list-content
+						input.skuId(type="hidden",value="#{obj2.skuId}")
+						input.amount(type="hidden",value="#{obj2.quantity}")
+						span.list-goods
+							img(onclick="location.href='/detail?id=#{obj2.itemId}'",src="#{obj2.picUrl}",data-id="#{obj2.skuId}",data-num="#{obj2.quantity}")
+							strong
+								b=obj2.itemName
+								label 规格：#{obj2.skuValue}
+						span.list-type
+							label #{obj.subOrderDO.orderType=='bond'?'保税':''}#{obj.subOrderDO.orderType=='common'?'一般贸易':''}
+						span.list-number
+							label=obj2.quantity
+						span.list-goodsprice
+							label='￥'+(obj2.sellPrice*obj2.quantity/100).toFixed(2)
+						span.list-taxprice
+							label='￥'+(obj2.taxPrice/100).toFixed(2)
+						span.list-allprice
+							label='￥'+((obj2.sellPrice*obj2.quantity+obj2.taxPrice)/100).toFixed(2)
+		p
+			span 优惠券
+			label
+				select#coupon
+					-if(!data3) data3={}
+					-if(!data3.list) data3.list=[]
+					-if(data3.list.length<1){
+						option(value='-1') 暂无可用优惠券
+					-}
+					option(value='-1') 不使用优惠券
+					each obj,i in data3.list
+						option(value="#{obj.id}")=obj.name
+	//.createorder-info
+		h3 支付方式
+		//h4#pay_type
+			label 
+				input(type='checkbox') 
+				//b 余额
+				span
+			label 
+				input(type='checkbox') 
+				//b 支付宝
+				span
+			label
+				input(type='checkbox',checked='checked') 
+				//b 微信
+		div#pay_type.pay-type
+			span 
+				input.checkbox(type='checkbox',name='payType',checked='checked') 
+				label 第三方支付
+			ul.center-3rd-list
+				li.c(data-id='2')
+					span.alipay
+				li(data-id='3')
+					span.wxpay
+			//span
+				input.checkbox(type='checkbox',name='payType')
+				label 余额支付
+			//b.pay-for-balance
+				input#payCodeTxt.txt-m(type="text",palceholder="请输入6位验证码")
+				button#payCodeBtn 获取短信验证码
+
+
+
+
+
+	.createorder-info
+		h3
+		h4
+			b 总价:
+			label ￥#{data.obj?(data.obj.itemPrice/100).toFixed(2):'0'}
+		h5
+			b 邮费:
+			label ￥#{data.obj?(data.obj.freightPrice/100).toFixed(2):'0'}
+		h5
+			b 税费：
+			label.rmb=data.obj.taxPrice/100
+		h2
+			b 应付:
+			label ￥#{data.obj?((data.obj.itemPrice+data.obj.freightPrice+data.obj.taxPrice)/100).toFixed(2):0}
+		//b=JSON.stringify(data)
+		p.buynow-box
+			button.buynow 提交订单
+	#alipay_box(style="display:none;")
+block footer
+	script(src='/js/data_area.js?v=#{_v}')
+	script _Addr.bind('#province','#city','#area');
+	script(src='/js/createorder.js?v=#{_v}')

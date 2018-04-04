@@ -1,0 +1,76 @@
+extends layout
+
+block content
+	-var item=data.obj.item;
+	-var format=data.obj.skuList;
+	-var skuPriceList=data.obj.skuPriceList
+	.detail-head-box
+		.detail-head-left
+			img#chooseImg(src="#{item.picUrls[0]}")
+			ul.detail-head-list
+				each obj,i in item.picUrls
+					li(class="#{i==0?'c':''}")
+						img(src="#{obj}")
+
+
+		.detail-head-right
+			h1=item.name
+			h2#sellPrice=((skuPriceList)?(skuPriceList.length>0?('￥'+skuPriceList[0].levelPrice/100):'￥'+item.sellPrice/100):'登陆后查看价格')
+			h3 
+				span市场价 
+				labe ￥#{item.marketPrice/100}
+			.format-box(style="#{format.length==1?'display:none;':''}")
+				span 规格
+				ul.format-list
+					each obj,i in format
+						li(class="#{i==0?'c':''}",skuId='#{obj.id}')
+							span obj.itemName
+							label ￥#{obj.marketPrice}
+								b (￥#{obj.salePrice}件)
+			
+			-if(!skuPriceList || (skuPriceList && skuPriceList.length>0))
+				.numberPrice-box
+					span 数量规格
+					ul.number-list
+						-if(skuPriceList){
+							each obj,i in skuPriceList
+								li(class="#{i==0?'c':''}",data-min='#{obj.minNumber}',data-max='#{obj.maxNumber}',data-price='#{obj.levelPrice}')
+									span=obj.minNumber+'-'+obj.maxNumber+'件'
+									label='￥'+(obj.levelPrice/100)+'/件'
+						-}else{
+							li 
+								b 
+									a(href="/login?url=detail?id=#{id}") 登陆后查看
+						-}
+			p
+				span 条形码
+				label=item.barcode
+			p
+				span 库存
+				label=item.storageNum
+			p
+				span 贸易类型
+				label=item.itemType=='common'?'一般贸易':'保税'
+			p
+				span 进口税
+				label ￥#{data.obj.taxPrice?data.obj.taxPrice/100:0}
+			p.detail-num
+				span 购买数量
+				button(data-num='-1') -
+				input.txtNum#amount(type='text',value='1')
+				button(data-num='1') +
+			p
+				a.detail-buynow#buyNow 立即购买
+				a.detail-addshopingcar#addShoppingCar 加入进货单
+
+	.detail-info-box
+		each obj in data.obj.itemArticle.contextPics
+			img(src="#{obj}")
+
+
+
+
+
+block footer
+	script var storgeNum=#{item.storageNum};
+	script(src='/js/detail.js?v=#{_v}')

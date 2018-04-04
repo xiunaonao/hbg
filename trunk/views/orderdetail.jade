@@ -1,0 +1,269 @@
+extends layout
+
+block content
+	-var obj=data.obj;
+	-var goods=[];
+
+	input#username(type="hidden",value="#{_user.mobile}")
+	.orderdetail-info
+		ul.order-tree
+			li(class='#{obj.orderStatus>=1?"c":""}')
+				u
+				i
+				label 创建订单
+			li(class='#{obj.orderStatus>=3?"c":""}')
+				u
+				i
+				label 已付款
+			li(class='#{obj.orderStatus>=5?"c":""}')
+				u
+				i
+				label 海关清关
+			li(class='#{obj.orderStatus>=7?"c":""}')
+				u
+				i
+				label 已发货
+			li(class='#{obj.orderStatus>=15?"c":""}')
+				u
+				i
+				label 已完成
+	.orderdetail-info
+		h3 物流信息
+		.express-box
+			-if(!express || express.length<1)
+				label 暂无物流信息
+			-else
+				each obj_ex,j in express
+					p
+						span 承运来源:
+						label=obj_ex.obj.comName
+					p
+						span 物流状况:
+						label=obj_ex.obj.stateMsg
+					p
+						span 运单号:
+						label=obj_ex.obj.nu
+					p
+						span 物流动态：
+						
+					-if(obj_ex.obj.data)
+						ul.express-track
+							each obj,i in obj_ex.obj.data
+								li(style="#{(i>0 && express.length>1)?'display:none':''}")
+									h6=obj.context
+									p=obj.time
+					-else
+						label=obj_ex.obj.message
+
+
+
+
+
+
+
+	.orderdetail-info
+		h3 订单详情
+		p
+			span 订单编号
+			label=obj.orderNo
+		p
+			span 收货人
+			label=obj.consigneeName
+		p
+			span 联系电话
+			label=obj.consigneeTele
+		p
+			span 收货地址
+			label=obj.consigneeProvince+obj.consigneeCity+obj.consigneeArea+' '+obj.consigneeAddress
+	.orderdetail-info
+		-if(obj && obj.subOrderList && obj.subOrderList.length>0)
+			-goods=obj.subOrderList[0].subOrderDO.orderItemSkuList;
+		ul.goodsul
+			each item2,j in obj.subOrderList
+				-goods=item2.subOrderDO.orderItemSkuList;
+				each item,i in goods
+					li
+						span
+							img(src="#{item.picUrl}")
+							label=item.itemName
+							br
+							span ￥#{(item.sellPrice/100).toFixed(2)}
+						p='x'+item.quantity
+						p=item2.subOrderDO.orderType=='common'?'一般贸易':'保税'
+
+	.orderdetail-info
+		p
+			span 订单状态
+			-var stu=obj.orderStatus
+			label #{stu==0?'已取消':''}#{stu==1?'待支付':''}#{stu==3?'待发货':''}#{stu==7?'待收货':''}#{stu==4?'已关闭':''}#{stu==15?'已收货':''}
+		p
+			span 创建时间
+			-var date=new Date(obj.createTime);
+			label=date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()
+		p
+			span 备注
+			label=obj.buyerRemark
+				i &nbsp;
+	-if(obj.returnInfo)
+		.orderdetail-info
+			h3 退款信息
+			p
+				span 退款状态
+				-var rStu=obj.returnInfo.returnStatus
+				-if(rStu==-1)
+					label 审核不通过，理由:#{obj.returnInfo.checkMessage}
+				-if(rStu==0)
+					label 已取消
+				-if(rStu==1)
+					label 退单已申请
+				-if(rStu==3)
+					label 退单正在审核
+				-if(rStu==7)
+					label 退单已完成，退款将原路返回，到款可能会有所延迟，请留意
+					//已提交支付宝退款
+				-if(rStu==8)
+					label 退单已完成，退款将原路返回，到款可能会有所延迟，请留意
+					//已提交微信退款
+				-if(rStu==9)
+					label 退单已完成，退款将原路返回，到款可能会有所延迟，请留意
+					//已提交余额退款
+			p
+				span 退款金额
+				label.rmb=obj.returnInfo.itemPrice/100
+			p
+				span 退款类型
+				label=obj.returnInfo.returnType==1?'退货并退款':'仅退款'
+			p
+				span 申请时间
+				-var date=new Date(obj.returnInfo.editTime)
+				label=date.getFullYear()+'-'+(date.getMonth()+1)+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()
+
+			p
+				span 扣除费用
+				label.rmb=obj.returnInfo.actualPrice?(obj.returnInfo.itemPrice-obj.returnInfo.actualPrice)/100:0
+			p
+				span 实际退费
+				label.rmb=obj.returnInfo.actualPrice?(obj.returnInfo.actualPrice)/100:0
+			p
+				span 退货理由
+				label=obj.returnInfo.reason
+			ul.goodsul
+				each item,i in obj.returnInfo.orderReturnDetailList
+					li
+						span
+							img(src="#{item.picUrl}")
+							label=item.itemName
+							br
+							span ￥#{(item.sellPrice/100).toFixed(2)}
+						p='x'+item.quantity
+						p=(item.itemType=='common'?'一般贸易':'')+(item.itemType=='bond'?'保税':'')
+
+
+	.orderdetail-info
+		h3 价格信息
+		p
+			span 商品总价
+			label.rmb=obj.itemPrice/100
+		p
+			span 运费
+			label.rmb=obj.freightPrice/100
+		p
+			span 进口税
+			label.rmb=obj.taxPrice/100
+		p
+			span 平台优惠
+			label.rmb=obj.couponPrice<obj.itemPrice?obj.couponPrice/100:obj.itemPrice/100
+		p.order-allprice
+			span 订单总价
+			label.rmb=obj.payPrice>0?obj.payPrice/100:0
+		
+		-if(obj.orderStatus==1)
+			div#pay_type.pay-type
+				span 
+					input.checkbox(type='checkbox',name='payType',checked='checked') 
+					label 第三方支付
+				ul.center-3rd-list
+					li.c(data-id='2')
+						span.alipay
+					li(data-id='3')
+						span.wxpay
+				//span
+					input.checkbox(type='checkbox',checked='checked',name='payType')
+					label 余额支付
+				//b.pay-for-balance
+					input#payCodeTxt.txt-m(type="text",palceholder="请输入6位验证码")
+					button#payCodeBtn 获取短信验证码
+
+			//h4#pay_type(style="height:100px;")
+				p 立即支付
+				label 
+					input(type='checkbox') 
+					b 余额
+				label 
+					input(type='checkbox') 
+					b 支付宝
+				label
+					input(type='checkbox',checked='checked') 
+					b 微信
+		h3
+		p.orderdetail-option
+			-if(obj.orderStatus==1)
+				button#payNow 支付
+				button#cancelOrder 取消订单
+			-if(obj.orderStatus>1 && obj.orderStatus<15 && obj.orderStatus!=4 && (!obj.returnInfo || rStu<=0 ))
+				button#refundOrder 申请退款
+			-if(obj.returnInfo && rStu!=0 && rStu<2 && rStu!=-1)
+				button#cancelRefundOrder 取消退款
+			-if(obj.orderStatus==7)
+				button#confirmOrder 确认收货
+			
+	.orderdetail-info
+		.status-box
+
+	.center-alert-box
+		.refund-box
+			.close-btn
+			h5 申请退款
+			input#refundNo(type="hidden")
+			ul.center-userinfo.order-refund
+				//li.center-userhead
+					span 订单号
+					label#orderNo 12050205252102022
+				li
+					input#allchecked(type="checkbox",checked="checked")
+					span 全选/全不选
+					label &nbsp;
+				
+				li
+					ul.refund-goods
+				li
+					span 退款方式
+					label
+						select#refundType
+							option(value="1") 退货并退款
+							option(value="2") 仅退款
+				li
+					span 退款理由
+					label
+						select#yourReason
+							option 多买/拍错/不想要
+							option 未按约定时间发货
+							option 快递一直未送到
+							option 空包裹/少货
+							option 其他
+				li
+					span 其他说明
+					label
+						textarea.txt-m#moreReason
+				li
+					button#confirmRefund 确定退款
+	#alipay_box(style="display:none;")
+block footer
+	script var no='#{no}';
+	script var goodsData=[];
+	each item2,j in obj.subOrderList
+		-goods=item2.subOrderDO.orderItemSkuList;
+		each obj2,i in goods
+			script goodsData.push({id:#{obj2.itemId},skuId:#{obj2.skuId},img:'#{obj2.picUrl}',name:'#{obj2.itemName}',price:#{obj2.sellPrice/100},num:#{obj2.quantity},type:'#{obj.orderType}'});
+	script(src='/js/orderDetail.js?v=#{_v}')
+	

@@ -1,0 +1,68 @@
+extends layout
+
+block content
+	input#__ky(type="hidden",value="#{ky}")
+	.index-category
+		.index-category-name 分类
+		.index-category-value#catBox
+			a.c(cid='-1') 全部
+			-var category=data.obj.rootCategorys
+			each obj in category
+				a(cid="#{obj.id}") #{obj.name}
+	.index-category
+		.index-category-name 品牌
+		.index-category-value#brandBox
+			a.c(cid='-1') 全部
+			-var brands=data.obj.brands
+			-var brands2=[];
+			-var showLength=10;
+			-for(var i=0;i<showLength;i++){
+				-if(brands[i])
+					-brands2.push(brands[i]);
+			-}
+			each obj in brands2
+				a(cid="#{obj.id}") #{obj.name}
+	.goods-list
+		.list-filter
+			.list-filter-order
+				span.orderBy(data-name='sellNum') 销量
+				span.orderBy(data-name='sellPrice') 价格
+			//.list-filter-price
+				input(placeholder='￥')
+				span -
+				input(placeholder='￥')
+				button 确定
+			.list-filter-check(style='#{type=="0"?"":"display:none;"}')
+				input(type='checkbox',data-name='bond',checked='#{type==2?true:false}')
+				span 保税
+				input(type='checkbox',data-name='common',checked='#{type==1?true:false}')
+				span 一般贸易
+			.list-filter-page
+				a.page-move(data-page='#{data.pcPage.page>1?data.pcPage.page-1:1}') <
+				a#pageNow=data.pcPage.page
+				span /
+				a#pageAll=data.pcPage.pages
+				a.page-move(data-page='#{data.pcPage.page<data.pcPage.pages?data.pcPage.page+1:data.pcPage.pages}') >
+		ul.list-item
+			-var item=data.obj.items
+			-if(!item){item=[]}
+			each obj in item
+				li.item
+					.goods
+						a.goods-img(href="/detail?id=#{obj.id}",target='_blank')
+							img(src="#{obj.picUrls[0]}")
+					.goods-title
+						a(href="/detail?id=#{obj.id}",target='_blank')
+							span=obj.name
+					.goods-price
+						.goods-price-right
+							label 市场价
+							span ￥#{(obj.marketPrice/100.0).toFixed(2)}
+
+						.goods-price-left
+							strong ￥#{(obj.sellPrice/100.0).toFixed(2)}
+
+
+block footer
+	script var __itemType='#{type==1?'common':''}#{type==2?'bond':''}';
+	script(src="/js/goodsList.js?v=#{_v}")

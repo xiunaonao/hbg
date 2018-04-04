@@ -1,0 +1,30 @@
+extends layout
+
+block content
+	.center-box
+		ul.center-left
+		.center-right
+			.form-info
+				p
+					span 手机号码
+					label=_user.mobile
+				p.yzm-box
+					span 验证码
+					label
+						input#postcodeTxt
+						button#postcodeBtn 发送验证码
+				p
+					span 新密码
+					label
+						input.txt-l#newPassword(type="password")
+				p
+					span 确认密码
+					label
+						input.txt-l#newPassword2(type="password")
+				p
+					span &nbsp;
+					label 
+						button.update-password#updatePwd 确定修改
+block footer
+	script tel='#{_user.mobile}'; _app.centerMenu(2);
+	script(src='/js/updatepwd.js?v=#{_v}')

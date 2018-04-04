@@ -1,0 +1,94 @@
+#项目说明
+
+####项目结构
+
+bin                     ----------仅有一个www文件，项目的启动文件，启动方式，项目根目录下(trunk/)打开命令，用node ./bin/www启动项目
+controller              ----------数据库接口文件
+-----homeApi.js         ----------主页数据接口
+-----orderApi.js        ----------订单数据接口
+-----userApi.js         ----------用户数据接口
+node_modules            ----------下载第三方包存放目录，无需理会
+public                  ----------静态文件目录，包括js，css和图片
+-----js
+-----img
+-----css
+routes					----------路由文件
+-----api.js             ----------用ajax请求的接口，放在api.js下
+-----index.js           ----------首页，商品列表，详情，登陆，注册等在不需要登录即可访问的页面路由
+-----order.js           ----------跟订单有关的页面路由
+-----user.js            ----------跟用户信息有关的页面路由
+views					----------视图文件，即静态页面(文件格式为jade，与html标签不同，但结构大致，有一定语法规范)
+app.js                  
+package.json            ----------配置信息，包含下载的包和版本号等信息
+
+
+
+
+
+
+####启动项目
+
+trunk目录下，打开命令框输入node ./bin/www 即可启动项目
+浏览器打开localhost:3000或者127.0.0.1:3000即可访问
+
+
+####关于jade语法
+jade语法不使用html中的</>，使用空格或者缩进（tab）来控制层级
+
+示例：
+
+html：
+
+<html>
+	<head>
+		<title>标题</title>
+	</head>
+	<body>
+		<ul class="ulList">
+			<li id="li1" style="color:red;">这是第一个</li>
+			<li id="li2" class="li2css">这是第二个</li>
+		</ul>
+		<div>这是DIV</div>
+	</body>
+</html>
+--------------------------
+jade:
+
+html
+	head
+		title 标题
+	body.ulList
+		ul
+			li#li1(style="color:red") 这是第一个
+			li#li2.li2css 这是第二个
+		div 这是DIV
+
+jade语法不需要尖括号也不需要写结尾符号，只需要在标签前打空格键或者tab键，注意空格和tab不能同时使用，只能选一个使用
+标签后用.和#声明class和id，类似css
+标签后用括号声明标签属性，多个属性用逗号隔开 如:input(type="text",value="输入内容")，css和js的引用同理
+
+
+####关于路由
+路由是声明jade文件的访问地址，定义在routes目录下
+api.js 声明 www.xxx.com/api/下的访问，项目中全部为json数据
+index.js 声明 www.xxx.com/下的访问，为首页和其他无需登陆页面
+order.js 声明 www.xxx.com/order/下的访问
+user.js 声明 www.xxx.com/users/下的访问
+
+路由的方法：
+
+router.get(['/','/web/','/index','/web/index'], function(req, res, next) {
+	var ky='';
+	if(req.body.ky)
+		ky=req.body.ky;
+	res.render('index',{title:'首页',ky:ky,testData:{name:"测试数据"}});
+  
+});
+
+router.get 
+----参数1为请求的路径，可以为数组，浏览器输入www.xxx.com/,www.xxx.com/index,www.xxx.com/web/,www.xxx.com/web/index 都可请求到该路由
+----参数2为回调方法,参数req,res,next不可随意更改，在这个方法中
+		req.body获取链接中携带的参数,        如：req.body.ky=123 www.xxx.com/index?ky=123
+		res.render('index',{title:'首页',ky:ky,testData:{name:"测试数据"}})返回页面给用户
+		----参数1为jade文件名,index即指index.jade文件
+		----参数2为返回到页面的数据，可以在页面中随意获取这些数据

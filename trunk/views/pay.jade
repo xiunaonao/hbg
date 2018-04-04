@@ -1,0 +1,42 @@
+extends layout
+
+block content
+	style.
+		#payBox{width:500px;background:#FFF;margin:10px auto;}
+		#payBox>*{text-align:center;}
+		#title{height:50px;line-height:50px;overflow:hidden;}
+		#no{color:#F00;font-weight:100;}
+		#price{font-size:25px;color:#FA0;line-height:50px;}
+		h1>img{width:350px;}
+	div#payBox
+		h3#title=name
+		h5#no='订单编号:'+no
+		h3#type #{type==2?'支付宝':''}#{type==3?'微信支付':''}
+		h4#price='￥'+price
+		h1
+			img(src="#{src}")
+		h2 请打开微信“扫一扫”扫码二维码'
+
+block footer
+	script.
+		_app.AJAX('/api/users','GET',{},function(data2){});
+		setInterval(function(){
+			_app.AJAX('/api/payStatus','POST',{orderNo:'#{no}'},function(data){
+				var data=JSON.parse(data);
+				if(data.obj=='SUCCESS'){
+					alert('支付成功');
+
+					if('#{name}'=='账号充值'){
+						_app.AJAX('/api/users','GET',{},function(data2){
+							location.href='/users/';
+						});
+						
+					}else{
+						location.href='paySuccess?no=#{no}';
+					
+					}
+				}
+			});
+
+		},3000);
+		
